@@ -1,0 +1,741 @@
+openapi: 3.0.0
+info:
+  title: Social network
+  version: 1.0.0
+  description: Social network API
+servers:
+  - url: http://localhost:8080/{basePath}
+    description: local-dev
+    variables:
+      basePath:
+        default: api/socialNetwork/v1
+paths:
+
+  /oauth/i:
+    get:
+      operationId: getUserinfo
+      tags:
+        - auth
+      summary: Get userinfo
+      description: Get userinfo
+      responses:
+        "200":
+          $ref: "#/components/responses/GetUserinfoResp"
+        "401":
+          description: User is unauthorized
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+
+  /posts/{postId}:
+    get:
+      operationId: getPostById
+      tags:
+        - post
+      summary: Get post by id
+      description: Get post by id
+      parameters:
+        - $ref: "#/components/parameters/postId"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetPostByIdResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+    put:
+      operationId: updatePostById
+      tags:
+        - post
+      summary: Update post by id
+      description: Update post by id
+      parameters:
+        - $ref: "#/components/parameters/postId"
+      requestBody:
+        description: Create a new post
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/post"
+      responses:
+        "200":
+          $ref: "#/components/responses/UpdatePostByIdResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+
+  /posts:
+    get:
+      operationId: getPosts
+      tags:
+        - post
+      summary: Get post list
+      description: Get post list
+      parameters:
+        - $ref: "#/components/parameters/postListLimit"
+        - $ref: "#/components/parameters/lastId"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetPostListResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+    post:
+      operationId: savePost
+      tags:
+        - post
+      summary: Save post
+      description: Save post
+      requestBody:
+        description: Create a new post
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/post"
+        required: true
+      responses:
+        "200":
+          $ref: "#/components/responses/SavePostResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+
+  /comments/{commentId}:
+    get:
+      operationId: getCommentById
+      tags:
+        - comment
+      summary: Get comment by id
+      description: Get comment by id
+      parameters:
+        - $ref: "#/components/parameters/commentId"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetCommentByIdResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+    put:
+      operationId: updateCommentById
+      tags:
+        - comment
+      summary: Update comment by id
+      description: Update comment by id
+      parameters:
+        - $ref: "#/components/parameters/commentId"
+      requestBody:
+        description: Create a new comment
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/comment"
+      responses:
+        "200":
+          $ref: "#/components/responses/UpdateCommentByIdResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+
+  /comments:
+    get:
+      operationId: getComments
+      tags:
+        - comment
+      summary: Get comment list
+      description: Get comment list
+      parameters:
+        - $ref: "#/components/parameters/commentListLimit"
+        - $ref: "#/components/parameters/lastId"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetCommentListResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+    post:
+      operationId: saveComment
+      tags:
+        - comment
+      summary: Save comment
+      description: Save comment
+      requestBody:
+        description: Create a new comment
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/comment"
+        required: true
+      responses:
+        "200":
+          $ref: "#/components/responses/SaveCommentResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+
+  /postLikes/{postLikeId}:
+    get:
+      operationId: getPostLikeById
+      tags:
+        - postLike
+      summary: Get post like by id
+      description: Get post like by id
+      parameters:
+        - $ref: "#/components/parameters/postLikeId"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetPostLikeByIdResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+    put:
+      operationId: updatePostLikeById
+      tags:
+        - postLike
+      summary: Update post like by id
+      description: Update post like by id
+      parameters:
+        - $ref: "#/components/parameters/postLikeId"
+      requestBody:
+        description: Update a single post like
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/postLike"
+      responses:
+        "200":
+          $ref: "#/components/responses/UpdatePostLikeByIdResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+
+  /postLikes:
+    get:
+      operationId: getPostLikes
+      tags:
+        - postLike
+      summary: Get post like list
+      description: Get post like list
+      parameters:
+        - $ref: "#/components/parameters/postLikeListLimit"
+        - $ref: "#/components/parameters/lastId"
+      responses:
+        "200":
+          $ref: "#/components/responses/GetPostLikeListResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+    post:
+      operationId: savePostLike
+      tags:
+        - postLike
+      summary: Save post like
+      description: Save post like
+      requestBody:
+        description: Create a new post like
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/postLike"
+        required: true
+      responses:
+        "200":
+          $ref: "#/components/responses/SavePostLikeResp"
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+                
+  
+  
+components:
+  parameters:
+    postId:
+      in: path
+      name: postId
+      description: Post id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    commentId:
+      in: path
+      name: commentId
+      description: Comment id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    postLikeId:
+      in: path
+      name: postLikeId
+      description: Post like id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    postListLimit:
+      in: query
+      name: limit
+      description: Result limit
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 50
+        default: 10
+    commentListLimit:
+      in: query
+      name: limit
+      description: Result limit
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 50
+        default: 10
+    postLikeListLimit:
+      in: query
+      name: limit
+      description: Result limit
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 50
+        default: 20
+    lastId:
+      in: query
+      name: lastId
+      description: Result last id
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    GetUserinfoResp:
+      description: Userinfo
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/userinfo"
+
+    GetPostByIdResp:
+      description: Single post
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/post"
+
+    UpdatePostByIdResp:
+      description: Updated single post
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/post"
+
+    GetPostListResp:
+      description: Post list
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/post"
+
+    SavePostResp:
+      description: Saved post
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/post"
+
+    GetCommentByIdResp:
+      description: Single comment
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/comment"
+
+    UpdateCommentByIdResp:
+      description: Updated single comment
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/comment"
+
+    GetCommentListResp:
+      description: Comment list
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/comment"
+
+    SaveCommentResp:
+      description: Saved comment
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/comment"
+
+    GetPostLikeByIdResp:
+      description: Single post like
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/postLike"
+
+    UpdatePostLikeByIdResp:
+      description: Updated single post like
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/postLike"
+
+    GetPostLikeListResp:
+      description: Post like list
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/postLike"
+
+    SavePostLikeResp:
+      description: Saved post like
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/postLike"
+
+    # 403
+    NoAccessError:
+      description: No Access
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/noAccessError"
+
+    # 404
+    NotFoundError:
+      description: Data not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/notFoundError"
+
+    # 500
+    WentWrongError:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/wentWrongError"
+
+  schemas:
+    userRole:
+      type: string
+      description: User role
+      enum:
+        - Admin
+        - Moderator
+        - Customer
+
+    permission:
+      type: string
+      description: User role permission
+      enum:
+        - Read
+        - Write
+
+    userinfo:
+      type: object
+      description: Userinfo
+      properties:
+        fullName:
+          type: string
+          description: User full name
+        username:
+          type: string
+          description: Username
+        socialNetworkRoles:
+          type: array
+          description: Scope role for user
+          items:
+            $ref: "#/components/schemas/userRole"
+        email:
+          type: string
+          description: User e-mail
+        permissions:
+          description: User role permissions
+          additionalProperties:
+            $ref: "#/components/schemas/permission"
+      required:
+        - fullName
+        - username
+        - socialNetworkRoles
+        - email
+        - permissions
+
+    postPhoto:
+      type: object
+      description: Post photo
+      properties:
+        postPhotoId:
+          type: string
+          format: uuid
+          description: Post photo id
+        order:
+          type: integer
+          description: Display order within the post
+          minimum: 0
+        url:
+          type: string
+          format: uri
+          description: Photo URL
+        width:
+          type: integer
+          description: Photo width in pixels
+          minimum: 1
+        height:
+          type: integer
+          description: Photo height in pixels
+          minimum: 1
+      required:
+        - postPhotoId
+        - order
+        - url
+        - width
+        - height
+
+
+    postData:
+      type: object
+      description: Post data
+      properties:
+        postId:
+          type: string
+          description: Post id
+          format: uuid
+        description:
+          type: string
+          description: Post description
+        locationId:
+          type: string
+          description: Location id
+          format: uuid
+        postPhotoData:
+          type: array
+          description: Post photos
+          items:
+            $ref: "#/components/schemas/postPhoto"
+        createdAt:
+          type: integer
+          format: int64
+          description: Creation timestamp (+00:00)
+      required:
+        - postId
+        - createdAt
+
+    post:
+      type: object
+      description: Post
+      allOf:
+        - $ref: "#/components/schemas/postData"
+
+    commentData:
+      type: object
+      description: Comment data
+      properties:
+        commentId:
+          type: string
+          description: Comment id
+          format: uuid
+        postId:
+          type: string
+          description: Post id
+          format: uuid
+        content:
+          type: string
+          description: Comment content
+        createdAt:
+          type: integer
+          format: int64
+          description: Creation timestamp (+00:00)
+      required:
+        - commentId
+        - postId
+        - content
+        - createdAt
+
+    comment:
+      type: object
+      description: Comment
+      allOf:
+        - $ref: "#/components/schemas/commentData"
+
+    postLikeData:
+      type: object
+      description: Post like data
+      properties:
+        postLikeId:
+          type: string
+          description: Post like id
+          format: uuid
+        postId:
+          type: string
+          description: Post id
+          format: uuid
+        userId:
+          type: string
+          description: User id
+          format: uuid
+        createdAt:
+          type: integer
+          format: int64
+          description: Creation timestamp (+00:00)
+      required:
+        - postLikeId
+        - postId
+        - userId
+        - createdAt
+
+    postLike:
+      type: object
+      description: Post like
+      allOf:
+        - $ref: "#/components/schemas/postLikeData"
+
+    wentWrongErrorCode:
+      type: string
+      description: Error code for 500 responses
+      enum:
+        - SERVER_ERROR
+        - SERVER_RETRYABLE_ERROR
+
+    serverError:
+      type: object
+      description: Server side error
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          $ref: "#/components/schemas/wentWrongErrorCode"
+      required:
+        - error
+        - code
+
+    serverRetryableError:
+      type: object
+      description: Server side retryable error
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          $ref: "#/components/schemas/wentWrongErrorCode"
+      required:
+        - error
+        - code
+
+    notFoundErrorCode:
+      type: string
+      description: Error code for 404 responses
+      enum:
+        - POST_NOT_FOUND_ERROR
+
+    postNotFoundError:
+      type: object
+      description: No post with provided id error
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          $ref: "#/components/schemas/notFoundErrorCode"
+      required:
+        - error
+        - code
+
+    notFoundError:
+      type: object
+      description: Requested entity does not exist error
+      oneOf:
+        - $ref: "#/components/schemas/postNotFoundError"
+
+    wentWrongError:
+      type: object
+      description: Server side error
+      oneOf:
+        - $ref: "#/components/schemas/serverError"
+        - $ref: "#/components/schemas/serverRetryableError"
+
+    noAccessErrorCode:
+      type: string
+      description: Error code for 403 responses
+      enum:
+        - FORBIDDEN_ERROR
+
+    forbiddenError:
+      type: object
+      description: User is unauthorized for the action
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          $ref: "#/components/schemas/noAccessErrorCode"
+      required:
+        - error
+        - code
+
+    noAccessError:
+      type: object
+      description: No access to requested entity
+      oneOf:
+        - $ref: "#/components/schemas/forbiddenError"
+
