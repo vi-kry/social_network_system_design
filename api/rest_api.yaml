@@ -80,11 +80,11 @@ paths:
       summary: Get post list
       description: Get post list
       parameters:
-        - $ref: "#/components/parameters/postListLimit"
+        - $ref: "#/components/parameters/listLimit"
         - $ref: "#/components/parameters/lastId"
       responses:
         "200":
-          $ref: "#/components/responses/GetPostListResp"
+          $ref: "#/components/responses/GetListResp"
         "401":
           description: User is unauthorized
         "403":
@@ -102,7 +102,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/post"
+              $ref: "#/components/schemas/savePostRequest"
         required: true
       responses:
         "200":
@@ -202,18 +202,18 @@ paths:
         "500":
           $ref: "#/components/responses/WentWrongError"
 
-  /postLikes/{postLikeId}:
+  /likes/{likeId}:
     get:
-      operationId: getPostLikeById
+      operationId: getLikeById
       tags:
-        - postLike
-      summary: Get post like by id
-      description: Get post like by id
+        - like
+      summary: Get like by id
+      description: Get like by id
       parameters:
-        - $ref: "#/components/parameters/postLikeId"
+        - $ref: "#/components/parameters/likeId"
       responses:
         "200":
-          $ref: "#/components/responses/GetPostLikeByIdResp"
+          $ref: "#/components/responses/GetLikeByIdResp"
         "401":
           description: User is unauthorized
         "403":
@@ -223,22 +223,22 @@ paths:
         "500":
           $ref: "#/components/responses/WentWrongError"
     put:
-      operationId: updatePostLikeById
+      operationId: updateLikeById
       tags:
-        - postLike
-      summary: Update post like by id
-      description: Update post like by id
+        - like
+      summary: Update like by id
+      description: Update like by id
       parameters:
-        - $ref: "#/components/parameters/postLikeId"
+        - $ref: "#/components/parameters/likeId"
       requestBody:
-        description: Update a single post like
+        description: Update a single like
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/postLike"
+              $ref: "#/components/schemas/like"
       responses:
         "200":
-          $ref: "#/components/responses/UpdatePostLikeByIdResp"
+          $ref: "#/components/responses/UpdateLikeByIdResp"
         "401":
           description: User is unauthorized
         "403":
@@ -248,19 +248,19 @@ paths:
         "500":
           $ref: "#/components/responses/WentWrongError"
 
-  /postLikes:
+  /likes:
     get:
-      operationId: getPostLikes
+      operationId: getLikes
       tags:
-        - postLike
-      summary: Get post like list
-      description: Get post like list
+        - like
+      summary: Get like list
+      description: Get like list
       parameters:
-        - $ref: "#/components/parameters/postLikeListLimit"
+        - $ref: "#/components/parameters/likeListLimit"
         - $ref: "#/components/parameters/lastId"
       responses:
         "200":
-          $ref: "#/components/responses/GetPostLikeListResp"
+          $ref: "#/components/responses/GetLikeListResp"
         "401":
           description: User is unauthorized
         "403":
@@ -268,21 +268,21 @@ paths:
         "500":
           $ref: "#/components/responses/WentWrongError"
     post:
-      operationId: savePostLike
+      operationId: saveLike
       tags:
-        - postLike
-      summary: Save post like
-      description: Save post like
+        - like
+      summary: Save like
+      description: Save like
       requestBody:
-        description: Create a new post like
+        description: Create a new like
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/postLike"
+              $ref: "#/components/schemas/like"
         required: true
       responses:
         "200":
-          $ref: "#/components/responses/SavePostLikeResp"
+          $ref: "#/components/responses/SaveLikeResp"
         "401":
           description: User is unauthorized
         "403":
@@ -372,6 +372,61 @@ paths:
         "500":
           $ref: "#/components/responses/WentWrongError"
 
+  /media:
+    post:
+      operationId: uploadMedia
+      tags:
+        - media
+      summary: Upload a photo
+      description: >
+        Uploads a photo via multipart/form-data. Backend validates the file,
+        stores it in object storage and returns media info with CDN URLs.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/uploadMediaParams"
+            encoding:
+              file:
+                contentType: image/jpeg, image/png, image/webp
+      responses:
+        "200":
+          $ref: "#/components/responses/UploadMediaResp"
+        "400":
+          description: File is not a valid image
+        "401":
+          description: User is unauthorized
+        "413":
+          description: File size exceeds limit (10 MB)
+        "415":
+          description: Unsupported media type
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+
+  /media/{mediaId}:
+    delete:
+      operationId: deleteMediaById
+      tags:
+        - media
+      summary: Delete media by id
+      description: Deletes an uploaded photo not yet attached to a post
+      parameters:
+        - $ref: "#/components/parameters/mediaId"
+      responses:
+        "204":
+          description: Media deleted
+        "401":
+          description: User is unauthorized
+        "403":
+          $ref: "#/components/responses/NoAccessError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          description: Media is attached to a post
+        "500":
+          $ref: "#/components/responses/WentWrongError"
+
 components:
   parameters:
     postId:
@@ -390,15 +445,15 @@ components:
       schema:
         type: string
         format: uuid
-    postLikeId:
+    likeId:
       in: path
-      name: postLikeId
+      name: likeId
       description: Post like id
       required: true
       schema:
         type: string
         format: uuid
-    postListLimit:
+    listLimit:
       in: query
       name: limit
       description: Result limit
@@ -416,7 +471,7 @@ components:
         minimum: 0
         maximum: 50
         default: 10
-    postLikeListLimit:
+    likeListLimit:
       in: query
       name: limit
       description: Result limit
@@ -449,6 +504,15 @@ components:
         minimum: 0
         maximum: 50
         default: 20
+    mediaId:
+      in: path
+      name: mediaId
+      description: Media id
+      required: true
+      schema:
+        type: string
+        format: uuid
+
 
   responses:
     GetUserinfoResp:
@@ -472,7 +536,7 @@ components:
           schema:
             $ref: "#/components/schemas/post"
 
-    GetPostListResp:
+    GetListResp:
       description: Post list
       content:
         application/json:
@@ -518,35 +582,35 @@ components:
           schema:
             $ref: "#/components/schemas/comment"
 
-    GetPostLikeByIdResp:
+    GetLikeByIdResp:
       description: Single post like
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/postLike"
+            $ref: "#/components/schemas/like"
 
-    UpdatePostLikeByIdResp:
+    UpdateLikeByIdResp:
       description: Updated single post like
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/postLike"
+            $ref: "#/components/schemas/like"
 
-    GetPostLikeListResp:
+    GetLikeListResp:
       description: Post like list
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/postLike"
+              $ref: "#/components/schemas/like"
 
-    SavePostLikeResp:
+    SaveLikeResp:
       description: Saved post like
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/postLike"
+            $ref: "#/components/schemas/like"
 
     GetSubscriptionByIdResp:
       description: Single subscription
@@ -571,6 +635,12 @@ components:
           schema:
             $ref: "#/components/schemas/subscription"
 
+    UploadMediaResp:
+      description: Uploaded media
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/media"
     # 403
     NoAccessError:
       description: No Access
@@ -664,13 +734,17 @@ components:
           type: integer
           description: Photo height in pixels
           minimum: 1
+        previewUrl:
+          type: string
+          format: uri
+          description: Compressed preview URL (CDN)
       required:
         - postPhotoId
         - order
         - url
         - width
         - height
-
+        - previewUrl
 
     postData:
       type: object
@@ -737,11 +811,11 @@ components:
       allOf:
         - $ref: "#/components/schemas/commentData"
 
-    postLikeData:
+    likeData:
       type: object
       description: Post like data
       properties:
-        postLikeId:
+        likeId:
           type: string
           description: Post like id
           format: uuid
@@ -758,16 +832,16 @@ components:
           format: int64
           description: Creation timestamp (+00:00)
       required:
-        - postLikeId
+        - likeId
         - postId
         - userId
         - createdAt
 
-    postLike:
+    like:
       type: object
       description: Post like
       allOf:
-        - $ref: "#/components/schemas/postLikeData"
+        - $ref: "#/components/schemas/likeData"
 
     subscriptionData:
       type: object
@@ -800,6 +874,86 @@ components:
       description: Subscription
       allOf:
         - $ref: "#/components/schemas/subscriptionData"
+
+    uploadMediaParams:
+      type: object
+      description: Media upload params
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Photo file (jpeg/png/webp, max 10 MB)
+      required:
+        - file
+
+    media:
+      type: object
+      description: Uploaded media
+      properties:
+        mediaId:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+          description: Original photo URL (CDN)
+        previewUrl:
+          type: string
+          format: uri
+          description: Compressed preview URL (CDN)
+        contentType:
+          type: string
+        sizeBytes:
+          type: integer
+          format: int64
+        width:
+          type: integer
+          minimum: 1
+        height:
+          type: integer
+          minimum: 1
+        createdAt:
+          type: integer
+          format: int64
+      required:
+        - mediaId
+        - url
+        - contentType
+        - sizeBytes
+        - width
+        - height
+        - createdAt
+
+    postPhotoInput:
+      type: object
+      description: Photo reference for post creation
+      properties:
+        mediaId:
+          type: string
+          format: uuid
+          description: Media id received from POST /media
+        order:
+          type: integer
+          minimum: 0
+      required:
+        - mediaId
+        - order
+
+    savePostRequest:
+      type: object
+      description: New post data
+      properties:
+        description:
+          type: string
+          maxLength: 2000
+        locationId:
+          type: string
+          format: uuid
+        photos:
+          type: array
+          maxItems: 10
+          items:
+            $ref: "#/components/schemas/postPhotoInput"
 
     wentWrongErrorCode:
       type: string
@@ -839,6 +993,7 @@ components:
       description: Error code for 404 responses
       enum:
         - POST_NOT_FOUND_ERROR
+        - MEDIA_NOT_FOUND_ERROR
 
     postNotFoundError:
       type: object
