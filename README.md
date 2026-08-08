@@ -148,3 +148,31 @@
 ### Подписчики
     - Traffic(write) = 43 RPS * 2016 B ≈ 87 kB/s
     - Traffic(read) = 120 RPS * 2016 B * 20 шт. ≈ 5000 kB/s
+
+## Емкость и количество дисков
+
+### Посты
+    - Capacity = traffic(write) * (24 * 60 * 60) * 365 = 8 MB/s * 86400 * 365 = 252288 GB ≈ 253 TB
+    
+    1. Расчет IOPS (сколько раз трогаем диск):
+        iops = RPS(write/create) + RPS(write/delete) + RPS(read) = 4 + 1 + 4700 = 4705
+        
+        Disk_for_iops(HDD) = 4705 / 100 = 48 HDD disks
+        Disk_for_iops(SSD sata) = 4705 / 1000 = 5 SSD sata disks
+        
+    2. Суммарный трафик (Traffic(write) + Traffic(read)):
+        throughput = 8 MB/s + 1.4 GB/s = 1408 MB/s 
+        
+        Disk_for_throughput(HDD) = 1408 / 100 = 15 HDD disks
+        Disk_for_throughput(SSD sata) = 1408 / 500 = 3 SDD sata disks
+
+    3. Расчет дисков по capacity:
+        Disk_for_capacity(HDD) = 253 TB  / 16 TB = 16 HDD disks 
+        Disk_for_capacity(SSD sata) = 253 TB  / 64 TB = 4 SSD sata disks 
+
+    Итоги:
+        (HDD) 48 disks by 6 TB
+        (SSD sata) 5 disks by 64 TB
+        
+        Ответ: Вариант с 5 дисками типа SSD (SATA) хоть и выглядит дороже,
+        но кажется более удобным в эксплуатации, нежели 48 HDD. Выбираем SDD (SATA) вариант.
