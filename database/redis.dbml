@@ -13,24 +13,6 @@ Table counter_user_subscribers {
   value bigint [note: 'INCR/DECR']
 }
 
-Table ratelimit_likes {
-  key   text [pk, note: 'rl:likes:{user_id}:{yyyy-mm-dd}']
-  value int [note: 'INCR при лайке, отказ при > 200']
-  ttl   text [note: '24h']
-}
-
-Table ratelimit_comments {
-  key   text [pk, note: 'rl:comments:{user_id}:{yyyy-mm-dd}']
-  value int [note: 'INCR, отказ при > 1000']
-  ttl   text [note: '24h']
-}
-
-Table ratelimit_subscriptions {
-  key   text [pk, note: 'rl:subs:{user_id}:{yyyy-mm-dd}']
-  value int [note: 'INCR, отказ при > 50']
-  ttl   text [note: '24h']
-}
-
 Table cache_post {
   key   text [pk, note: 'cache:post:{post_id}']
   value text [note: 'json поста']

@@ -31,12 +31,9 @@ Table posts {
 Table media {
   media_id      uuid [pk, default: `gen_random_uuid()`]
   user_id       uuid [not null, ref: > users.user_id]
-  content_type  varchar(32) [not null]
-  size_bytes    bigint [not null]
   width         int [not null]
   height        int [not null]
   s3_key        text [not null, note: 'original/{media_id}.{ext}']
-  preview_ready bool [not null, default: false]
   created_at    timestamptz [not null, default: `now()`]
 }
 
