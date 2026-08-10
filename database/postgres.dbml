@@ -1,0 +1,61 @@
+Table users {
+  user_id    uuid [pk, default: `gen_random_uuid()`]
+  username   varchar(64) [unique, not null]
+  full_name  varchar(128)
+  email      varchar(128) [unique, not null]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table subscriptions {
+  subscription_id    uuid [pk, default: `gen_random_uuid()`]
+  subscriber_user_id uuid [not null, ref: > users.user_id]
+  target_user_id     uuid [not null, ref: > users.user_id]
+  created_at         timestamptz [not null, default: `now()`]
+}
+
+Table locations {
+  location_id uuid [pk, default: `gen_random_uuid()`]
+  locality    varchar(128) [not null]
+  latitude    double [not null]
+  longitude   double [not null]
+}
+
+Table posts {
+  post_id     uuid [pk, default: `gen_random_uuid()`]
+  user_id     uuid [not null, ref: > users.user_id]
+  location_id uuid [ref: > locations.location_id]
+  description text
+  created_at  timestamptz [not null, default: `now()`]
+}
+
+Table media {
+  media_id      uuid [pk, default: `gen_random_uuid()`]
+  user_id       uuid [not null, ref: > users.user_id]
+  width         int [not null]
+  height        int [not null]
+  s3_key        text [not null, note: 'original/{media_id}.{ext}']
+  created_at    timestamptz [not null, default: `now()`]
+}
+
+Table post_photos {
+  post_photo_id uuid [pk, default: `gen_random_uuid()`]
+  post_id       uuid [not null, ref: > posts.post_id]
+  media_id      uuid [unique, not null, ref: > media.media_id]
+  photo_order   int  [not null, default: 0]
+  created_at    timestamptz [not null, default: `now()`]
+}
+
+Table comments {
+  comment_id uuid [pk, default: `gen_random_uuid()`]
+  post_id    uuid [not null, ref: > posts.post_id]
+  user_id    uuid [not null, ref: > users.user_id]
+  content    text [not null]
+  created_at timestamptz [not null, default: `now()`]
+}
+
+Table post_likes {
+  post_like_id uuid [pk, default: `gen_random_uuid()`]
+  post_id      uuid [not null, ref: > posts.post_id]
+  user_id      uuid [not null, ref: > users.user_id]
+  created_at   timestamptz [not null, default: `now()`]
+}
