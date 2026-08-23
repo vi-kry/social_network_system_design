@@ -149,7 +149,7 @@
     Для S3:
     - Traffic(write) = 4 RPS * 2 MB = 8 MB/s
     - Traffic(read) = 4700 RPS * 300 KB * 10 шт. ≈ 1.4 GB/s
-        Capacity = 8 MB/s * 86400 * 365 = 253 GB
+        Capacity = 8 MB/s * 86400 * 365 = 253 TB
 
 ### Комментарии
     - Traffic(write) = 608 RPS * 90 B ≈ 55 kB/s 
@@ -190,7 +190,7 @@
         но кажется более удобным в эксплуатации, нежели 48 HDD. Выбираем SDD (SATA) вариант.
 
 ### Посты (медиа, S3)
-    Capacity = 8 MB/s * 86400 * 365 = 253 GB
+    Capacity = 8 MB/s * 86400 * 365 = 253 TB
 
     Считать будем, что медиа раздаются через CDN с hit ratio 90%
     т.е. до дисков доходит 10% трафика чтений: 1.4 GB/s * 0.1 = 140 MB/s
@@ -208,8 +208,8 @@
         Disk_for_throughput(SSD sata) = 148 / 500 = 1 SDD sata disk
 
     3. Расчет дисков по capacity:
-        Disk_for_capacity(HDD) = 253 GB  / 32 TB = 8 HDD disks 
-        Disk_for_capacity(SSD sata) = 253 GB  / 100 TB = 3 SSD sata disks 
+        Disk_for_capacity(HDD) = 253 TB  / 32 TB = 8 HDD disks 
+        Disk_for_capacity(SSD sata) = 253 TB  / 100 TB = 3 SSD sata disks 
 
     Итоги:
         (HDD) 8 disks by 32 TB
