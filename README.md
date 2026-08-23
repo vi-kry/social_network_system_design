@@ -138,6 +138,18 @@
     
     - Traffic(write) = 4 RPS * (434 B + 68 B + 64 B + 2 MB) ≈ 8 MB/s
     - Traffic(read) = 4700 RPS * (434 B + 68 B + 64 B + 300 KB) * 10 шт. ≈ 1.4 GB/s
+    
+    Поскольку фото/медиа будет лежать не в Postgres, а в S3. Тогда нужно разделить трафик:
+
+    Для Postgres:
+    - Traffic(write) = 4 RPS * (434 B + 68 B + 64 B) ≈ 2.3 kB/s
+    - Traffic(read) = 4700 RPS * (434 B + 68 B + 64 B) * 10 шт. ≈ 27 MB/s
+        Capacity = 2.3 kB/s * 86400  * 365 = 72 GB
+    
+    Для S3:
+    - Traffic(write) = 4 RPS * 2 MB = 8 MB/s
+    - Traffic(read) = 4700 RPS * 300 KB * 10 шт. ≈ 1.4 GB/s
+        Capacity = 8 MB/s * 86400 * 365 = 253 GB
 
 ### Комментарии
     - Traffic(write) = 608 RPS * 90 B ≈ 55 kB/s 
@@ -148,3 +160,141 @@
 ### Подписчики
     - Traffic(write) = 43 RPS * 2016 B ≈ 87 kB/s
     - Traffic(read) = 120 RPS * 2016 B * 20 шт. ≈ 5000 kB/s
+
+## Емкость и количество дисков
+
+### Посты (метаданные, Postgres)
+    Capacity = 2.3 kB/s * 86400  * 365 = 72 GB
+    
+    1. Расчет IOPS (сколько раз трогаем диск):
+        iops = RPS(write/create) + RPS(write/delete) + RPS(read) = 4 + 1 + 4700 = 4705
+        
+        Disk_for_iops(HDD) = 4705 / 100 = 48 HDD disks
+        Disk_for_iops(SSD sata) = 4705 / 1000 = 5 SSD sata disks
+        
+    2. Суммарный трафик (Traffic(write) + Traffic(read)):
+        throughput = 2.3 kB/s + 27 MB/s ≈ 27 MB/s
+        
+        Disk_for_throughput(HDD) = 27 / 100 = 1 HDD disk
+        Disk_for_throughput(SSD sata) = 27 / 500 = 1 SDD sata disk
+
+    3. Расчет дисков по capacity:
+        Disk_for_capacity(HDD) = 72 GB  / 1 TB = 1 HDD disks 
+        Disk_for_capacity(SSD sata) = 72 GB  / 1 TB = 1 SSD sata disks 
+
+    Итоги:
+        (HDD) 48 disks by 1 TB
+        (SSD sata) 5 disks by 1 TB
+        
+        Ответ: Вариант с 5 дисками типа SSD (SATA) хоть и выглядит дороже,
+        но кажется более удобным в эксплуатации, нежели 48 HDD. Выбираем SDD (SATA) вариант.
+
+### Посты (медиа, S3)
+    Capacity = 8 MB/s * 86400 * 365 = 253 GB
+
+    Считать будем, что медиа раздаются через CDN с hit ratio 90%
+    т.е. до дисков доходит 10% трафика чтений: 1.4 GB/s * 0.1 = 140 MB/s
+
+    1. Расчет IOPS (сколько раз трогаем диск):
+        iops = RPS(write) + RPS(read с дисков, а не с CDN) = 4 + 470 = 474
+        
+        Disk_for_iops(HDD) = 474 / 100 = 5 HDD disks
+        Disk_for_iops(SSD sata) = 474 / 1000 = 1 SSD sata disk
+        
+    2. Суммарный трафик (Traffic(write) + Traffic(read с дисков, а не с CDN)):
+        throughput = 8 MB/s + 140 MB/s = 148 MB/s
+        
+        Disk_for_throughput(HDD) = 148 / 100 = 2 HDD disks
+        Disk_for_throughput(SSD sata) = 148 / 500 = 1 SDD sata disk
+
+    3. Расчет дисков по capacity:
+        Disk_for_capacity(HDD) = 253 GB  / 32 TB = 8 HDD disks 
+        Disk_for_capacity(SSD sata) = 253 GB  / 100 TB = 3 SSD sata disks 
+
+    Итоги:
+        (HDD) 8 disks by 32 TB
+        (SSD sata) 3 disks by 3 TB
+        
+        Ответ: Больше всего дисков требует capacity - объём хранения. То есть скорости HDD
+        хватает с запасом (CDN типо снимает основную нагрузку на чтение), а платить за быстрые SSD
+        нет смысла, т.к. IOPS тут не является критичный фактором. При этом хранилище вечно растёт.
+        и наращивать его дешевле будет хард-дисками. Выбираем 8 HDD по 32 TB.
+
+
+### Комментарии
+    - Capacity = traffic(write) * (24 * 60 * 60) * 365 = 55 kB/s * 86400 * 365 = 1735 GB ≈ 2 TB
+
+     1. Расчет IOPS (сколько раз трогаем диск):
+        iops = RPS(write/create) + RPS(write/delete) + RPS(read) = 600 + 8 + 3500 = 4108
+        
+        Disk_for_iops(HDD) = 4108 / 100 = 42 HDD disks
+        Disk_for_iops(SSD sata) = 4108 / 1000 = 5 SSD sata disks
+        
+     2. Суммарный трафик (Traffic(write) + Traffic(read)):
+        throughput = 55 kB/s + 3150 kB/s = 3205 kB/s = 4 MB/s 
+        
+        Disk_for_throughput(HDD) = 4 / 100 = 1 HDD disks
+        Disk_for_throughput(SSD sata) = 4 / 500 = 1 SDD sata disks
+    
+     3. Расчет дисков по capacity:
+        Disk_for_capacity(HDD) = 2 TB  / 16 TB = 1 HDD disks 
+        Disk_for_capacity(SSD sata) = 2 TB  / 64 TB = 1 SSD sata disks
+     
+     Итоги:
+        (HDD) 42 disks by 1 TB
+        (SSD sata) 5 disks by 1 TB
+        
+        Ответ: Вариант с 5 дисками типа SSD (SATA) хоть и выглядит дороже,
+        но кажется более удобным в эксплуатации, нежели 42 HDD. Выбираем SDD (SATA) вариант.
+
+### Лайки
+    - Capacity = traffic(write) * (24 * 60 * 60) * 365 = 135 kB/s * 86400 * 365 = 4258 GB ≈ 5 TB
+    
+    1. Расчет IOPS (сколько раз трогаем диск):
+        iops = RPS(write/create) + RPS(write/delete) + RPS(read) = 2400 + 1 + 1800 = 4201
+        
+        Disk_for_iops(HDD) = 4201 / 100 = 43 HDD disks
+        Disk_for_iops(SSD sata) = 4201 / 1000 = 5 SSD sata disks
+    
+    2. Суммарный трафик (Traffic(write) + Traffic(read)):
+        throughput = 135 kB/s + 2016 kB/s = 2151 kB/s = 3 MB/s
+        
+        Disk_for_throughput(HDD) = 3 / 100 = 1 HDD disks
+        Disk_for_throughput(SSD sata) = 3 / 500 = 1 SDD sata disks
+
+    3. Расчет дисков по capacity:
+        Disk_for_capacity(HDD) = 5 TB  / 16 TB = 1 HDD disks 
+        Disk_for_capacity(SSD sata) = 5 TB  / 64 TB = 1 SSD sata disks
+    
+    Итоги:
+        (HDD) 43 disks by 1 TB
+        (SSD sata) 6 disks by 1 TB (возьмем 6 дисков вместо 5 для запаса по объему памяти)
+        
+        Ответ: Вариант с 6 дисками типа SSD (SATA) хоть и выглядит дороже,
+        но кажется более удобным в эксплуатации, нежели 43 HDD. Выбираем SDD (SATA) вариант.
+
+### Подписчики
+    - Capacity = traffic(write) * (24 * 60 * 60) * 365 = 87 kB/s * 86400 * 365 = 2744 GB = 3 TB
+    
+    1. Расчет IOPS (сколько раз трогаем диск):
+        iops = RPS(write/create) + RPS(write/delete) + RPS(read) = 40 + 3 + 120 = 163
+        
+        Disk_for_iops(HDD) = 163 / 100 = 2 HDD disks
+        Disk_for_iops(SSD sata) = 163 / 1000 = 1 SSD sata disks
+    
+    2. Суммарный трафик (Traffic(write) + Traffic(read)):
+        throughput = 87 kB/s + 5000 kB/s = 5087 kB/s = 6 MB/s
+        
+        Disk_for_throughput(HDD) = 6 / 100 = 1 HDD disks
+        Disk_for_throughput(SSD sata) = 6 / 500 = 1 SDD sata disks
+
+    3. Расчет дисков по capacity:
+        Disk_for_capacity(HDD) = 3 TB  / 16 TB = 1 HDD disks 
+        Disk_for_capacity(SSD sata) = 3 TB  / 64 TB = 1 SSD sata disks
+    
+    Итоги:
+        (HDD) 2 disks by 2 TB
+        (SSD sata) 1 disks by 4 TB
+        
+        Ответ: Вариант с 2 дисками типа HDD по 2 TB в данной ситуации выглядит более выгодно.
+        При этом нет огромного количества дисков, что облегчает работу с ними. Выбираем HDD.

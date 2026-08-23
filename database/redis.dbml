@@ -1,0 +1,33 @@
+Table counter_post_likes {
+  key   text [pk, note: 'post:{post_id}:likes_count']
+  value bigint [note: 'INCR при лайке, DECR при удалении лайка']
+}
+
+Table counter_post_comments {
+  key   text [pk, note: 'post:{post_id}:comments_count']
+  value bigint [note: 'INCR/DECR']
+}
+
+Table counter_user_subscribers {
+  key   text [pk, note: 'user:{user_id}:subscribers_count']
+  value bigint [note: 'INCR/DECR']
+}
+
+Table cache_post {
+  key   text [pk, note: 'cache:post:{post_id}']
+  value text [note: 'json поста']
+  ttl   text [note: '~5 min']
+}
+
+Table cache_feed {
+  key   text [pk, note: 'cache:feed:{user_id}:p1 — первая страница ленты']
+  value text [note: 'json списка постов']
+  ttl   text [note: '~60 sec']
+}
+
+Table session {
+  key     text [pk, note: 'session:{token}, тип HASH']
+  user_id uuid
+  roles   text
+  ttl     text [note: 'время жизни сессии']
+}

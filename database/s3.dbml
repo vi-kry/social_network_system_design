@@ -1,0 +1,12 @@
+Table original_photos {
+  s3_key       text [pk, note: 'original/{media_id}.{ext}']
+  content_type varchar(32) [note: 'image/jpeg | image/png | image/webp']
+  size_bytes   bigint
+  note         text
+}
+
+Table preview_photos {
+  s3_key     text [pk, note: 'preview/{media_id}.jpg']
+  size_bytes bigint
+  note       text
+}
